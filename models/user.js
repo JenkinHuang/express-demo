@@ -3,6 +3,24 @@ const bcrypt = require('bcrypt');
 const db = redis.createClient();
 
 class User {
+    static getByName(name, cb) {
+        User.getId(name, (err, id) => {
+            if (err) return cb(err);
+            User.get(id, cb);
+        });
+    }
+
+    static getId(name, cb) {
+        db.get(`user:id:${name}`, cb);
+    }
+
+    static get(id, cb) {
+        db.hgetall(`user:${id}`, (err, user) => {
+            if (err) return cb(err);
+            cb(null, new User(user));
+        });
+    }
+
     constructor(obj) {
         for (let key in obj) {
             this[key] = obj[key];
